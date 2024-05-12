@@ -9,9 +9,10 @@ opencv-python = "*"
 cdflib = "*"
 scipy = "*"
 mediapipe = "*"
+ultralytics = "*"
+segment-anything = {git = "https://github.com/facebookresearch/segment-anything.git", editable = true}
 
 [dev-packages]
 
 [requires]
 python_version = "3.9"
-python_full_version = "3.9.18"
