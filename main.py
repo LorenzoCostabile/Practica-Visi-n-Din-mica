@@ -14,6 +14,7 @@ point3D = np.load("data/cdf/Walking 1_h36m_points3D.npy")
 print("point2D_h.shape=\n", point2D_h.shape)
 print("point2D_h.shape=\n", point2D_h[0])
 print("point2D.shape=\n", point2D.shape)
+print("point2D=\n", point2D)
 print("point3D.shape=\n", point3D[0])
 
 c1_params = code.get_cam_params(cam_id = "54138969", subject = 1)
@@ -41,23 +42,37 @@ total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 output_path = 'output_video.mp4'
 out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (frame_width, frame_height))
 
+point_2d = point2D[:2, :]
+#print("point_2d=\n", point_2d)
+print("point_2d.shape=\n", point_2d.shape)
+chunk_points = np.array_split(point_2d, 111232 // 32, axis=1)
+index_frame = 0
+print("len(chunk_points)=\n", len(chunk_points))
+
 # Iterar sobre cada frame del video
-while cap.isOpened():
+while cap.isOpened() and index_frame < len(chunk_points):
     ret, frame = cap.read()
     if not ret:
         break
     
     # Dibujar los puntos 2D en el frame
-    for point in points2D:
-        x, y = int(point[0][0]), int(point[0][1])
+    frame_points = chunk_points[index_frame]
+    for j in range(0, len(frame_points[0])):
+        #print("point[0]=\n", frame_points[0][j])
+        #print("point[1]=\n", frame_points[1][j])
+        #point = code.make_homo(point)
+        #point1 = code.reproject_point(point, project_cams[0])
+        x, y = int(frame_points[0][j]), int(frame_points[1][j])
         cv2.circle(frame, (x, y), 5, (0, 255, 0), -1)  # Dibuja un círculo verde
-    
+
     # Escribir el frame modificado en el video de salida
     out.write(frame)
     
     cv2.imshow('Frame', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
+
+    index_frame += 1
 
 # Liberar los recursos
 cap.release()
