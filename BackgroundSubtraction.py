@@ -28,3 +28,13 @@ def bs_GMG(frame):
     # Aplicar la substracción de fondo al fotograma
     fgMask = backSub_GMG.apply(frame)
     return fgMask
+
+#https://docs.opencv.org/4.x/d7/d4d/tutorial_py_thresholding.html
+#Diferencia entre imágenes consecutivas
+def bs_diff_frames(actual_gray_frame, prev_gray_frame):
+    # Calcular la diferencia absoluta entre el fotograma actual y el anterior
+    diff = cv.absdiff(actual_gray_frame, prev_gray_frame)
+    # Aplicar umbralización para obtener la máscara de movimiento
+    _, fgMask = cv.threshold(diff, 127, 255, cv.THRESH_BINARY)
+    #fgMask = cv.adaptiveThreshold(diff, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2)
+    return fgMask
