@@ -38,9 +38,7 @@ frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps = cap.get(cv2.CAP_PROP_FPS)
 total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-# Crear el objeto VideoWriter para guardar el video con los puntos dibujados
-output_path = 'output_video.mp4'
-out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (frame_width, frame_height))
+out = Utils.create_output_video("puntos.mp4")
 
 point_2d = point2D[:2, :]
 #print("point_2d=\n", point_2d)
