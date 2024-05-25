@@ -89,15 +89,21 @@ while cap.isOpened() and index_frame < len(chunk_points):
     second_level = cv.pyrDown(first_level)
     third_level = cv.pyrDown(second_level)
 
+    h, w = first_level.shape[:2]
+    second_level_resized = cv.resize(second_level, (w, h))
+    third_level_resized = cv.resize(third_level, (w, h))
+    Utils.draw_title(first_level, "First level")
+    Utils.draw_title(second_level_resized, "Second level")
+    Utils.draw_title(third_level_resized, "Third level")
+
     Utils.draw_title(frame, "Tracking Optical flow")
-    Utils.draw_title(mask, "Mask flow", color=(0,0,0))
     tmp1 = cv.hconcat([groundtruth, frame, mask])
-    #tmp2 = cv.hconcat([mask])
     final_img = cv.vconcat([tmp1])
     cv.imshow('Optical Flow', final_img)
-    cv.imshow('First level', first_level)
-    cv.imshow('Second level', second_level)
-    cv.imshow('Third level', third_level)
+
+    Utils.draw_title(mask, "Mask flow", color=(0,0,0))
+    pyramid_levels = cv.hconcat([first_level, second_level_resized, third_level_resized])
+    cv.imshow('Pyramid levels', pyramid_levels)
     
     if cv.waitKey(1) & 0xFF == ord('q'):
         break
