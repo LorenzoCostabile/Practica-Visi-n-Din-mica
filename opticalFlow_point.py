@@ -30,21 +30,16 @@ point_2d = point2D[:2, :]
 #Cámara 4
 #video_path = 'video/Walking 1.60457274.mp4'
 #point_2d = point2D[9:11, :]
-print("point_2d=\n", point_2d)
+#print("point_2d=\n", point_2d)
 
 #video_path = 'bs_output/bs_MOG2_Walking 1.54138969.mp4'
 cap = cv.VideoCapture(video_path)
 
 # Take first frame and find corners in it
 ret, frame = cap.read()
-
 old_gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
 
-# Create a mask image for drawing purposes
-mask = np.zeros_like(frame)
-
 total_frames = int(cap.get(cv.CAP_PROP_FRAME_COUNT))
-
 print("El video tiene {} fotogramas.".format(total_frames))
 
 # out = Utils.create_output_video("seguimiento_flujo_optico.mp4")
@@ -57,13 +52,25 @@ _, unique_indices = np.unique(old_points, axis=0, return_index=True)
 old_points = old_points[unique_indices]
 #print("old_points=\n", old_points)
 
-while cap.isOpened():
+#groundtruth = frame.copy()
+#Utils.draw_original_points(groundtruth, "Ground truth", frame_points)
+
+# Create a mask image for drawing purposes
+mask = np.zeros_like(frame)
+mask[:] = 255
+
+index_frame += 1
+while cap.isOpened() and index_frame < len(chunk_points):
     ret, frame = cap.read()
-    
+    groundtruth = frame.copy()
+
     if not ret:
         print('No frames grabbed!')
         break
     
+    frame_points = chunk_points[index_frame]
+    Utils.draw_original_points(groundtruth, "Ground truth", frame_points)
+
     gray_frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
     
     # calculate optical flow
@@ -74,28 +81,29 @@ while cap.isOpened():
     for i, (new, old) in enumerate(zip(new_points, old_points)):
         a, b = new.ravel()
         c, d = old.ravel()
-        #mask = cv.line(mask, (int(a), int(b)), (int(c), int(d)), color[i].tolist(), 2)
+        mask = cv.line(mask, (int(a), int(b)), (int(c), int(d)), color[i].tolist(), 2)
         frame = cv.circle(frame, (int(a), int(b)), 5, color[i].tolist(), -1)
         #img = cv.add(frame, mask)
     
     first_level = cv.pyrDown(frame)
     second_level = cv.pyrDown(first_level)
     third_level = cv.pyrDown(second_level)
-    fourth_level = cv.pyrDown(third_level)
-    fifth_level = cv.pyrDown(fourth_level)
-    sixth_level = cv.pyrDown(fifth_level)
 
-    cv.imshow('Frame', frame)
+    Utils.draw_title(frame, "Tracking Optical flow")
+    Utils.draw_title(mask, "Mask flow", color=(0,0,0))
+    tmp1 = cv.hconcat([groundtruth, frame, mask])
+    #tmp2 = cv.hconcat([mask])
+    final_img = cv.vconcat([tmp1])
+    cv.imshow('Optical Flow', final_img)
     cv.imshow('First level', first_level)
     cv.imshow('Second level', second_level)
     cv.imshow('Third level', third_level)
-    #cv.imshow('frame', frame)
-    #cv.imshow('frame', frame)
-    #cv.imshow('frame', frame)
     
     if cv.waitKey(1) & 0xFF == ord('q'):
         break
 
     old_points = new_points.reshape(-1, 1, 2)
+    index_frame += 1
 
+cap.release()
 cv.destroyAllWindows()
