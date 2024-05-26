@@ -97,11 +97,11 @@ while cap.isOpened() and index_frame < len(chunk_points):
     Utils.draw_title(third_level_resized, "Third level")
 
     Utils.draw_title(frame, "Tracking Optical flow")
+    Utils.draw_title(mask, "Mask flow", color=(0,0,0))
     tmp1 = cv.hconcat([groundtruth, frame, mask])
     final_img = cv.vconcat([tmp1])
     cv.imshow('Optical Flow', final_img)
-
-    Utils.draw_title(mask, "Mask flow", color=(0,0,0))
+    
     pyramid_levels = cv.hconcat([first_level, second_level_resized, third_level_resized])
     cv.imshow('Pyramid levels', pyramid_levels)
     

@@ -58,6 +58,10 @@ point = ()
 point_selected = False
 old_points =  np.array([[0, 0]], dtype = np.float32)
 
+# Create a mask image for drawing purposes
+mask = np.zeros_like(frame)
+mask[:] = 255
+
 def select_point(event, x, y, flags, params):
     global point, point_selected, old_points
     if event == cv.EVENT_LBUTTONDOWN:
@@ -89,7 +93,7 @@ while cap.isOpened():
         for i, (new, old) in enumerate(zip(new_points, old_points)):
             a, b = new.ravel()
             c, d = old.ravel()
-            #mask = cv.line(mask, (int(a), int(b)), (int(c), int(d)), color[i].tolist(), 2)
+            mask = cv.line(mask, (int(a), int(b)), (int(c), int(d)), color[i].tolist(), 2)
             frame = cv.circle(frame, (int(a), int(b)), 5, color[i].tolist(), -1)
             #img = cv.add(frame, mask)
 
@@ -100,15 +104,32 @@ while cap.isOpened():
     third_level = cv.pyrDown(second_level)
     fourth_level = cv.pyrDown(third_level)
     fifth_level = cv.pyrDown(fourth_level)
-    sixth_level = cv.pyrDown(fifth_level)
 
+    Utils.draw_title(frame, "Tracking Optical flow")
+    Utils.draw_title(mask, "Mask flow", color=(0,0,0))
+    tmp1 = cv.hconcat([frame, mask])
+    final_img = cv.vconcat([tmp1])
+
+    cv.imshow('Optical flow', final_img)
     cv.imshow('Frame', frame)
-    cv.imshow('First level', second_level)
-    cv.imshow('Second level', second_level)
-    #cv.imshow('frame', frame)
-    #cv.imshow('frame', frame)
-    #cv.imshow('frame', frame)
-    #cv.imshow('frame', frame)
+
+    h, w = frame.shape[:2]
+    first_level_resized = cv.resize(first_level, (w, h))
+    second_level_resized = cv.resize(second_level, (w, h))
+    third_level_resized = cv.resize(third_level, (w, h))
+    fourth_level_resized = cv.resize(fourth_level, (w, h))
+    fifth_level_resized = cv.resize(fifth_level, (w, h))
+    Utils.draw_title(first_level_resized, "First level")
+    Utils.draw_title(second_level_resized, "Second level")
+    Utils.draw_title(third_level_resized, "Third level")
+    Utils.draw_title(fourth_level_resized, "Fourth level")
+    Utils.draw_title(fifth_level_resized, "Fifth level")
+
+    tmp1 = cv.hconcat([frame, first_level_resized, second_level_resized])
+    tmp2 = cv.hconcat([third_level_resized, fourth_level_resized, fifth_level_resized])
+
+    pyramid_levels = cv.vconcat([tmp1, tmp2])
+    #cv.imshow('Pyramid level', pyramid_levels)
     
     if cv.waitKey(1) & 0xFF == ord('q'):
         break
