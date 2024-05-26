@@ -10,7 +10,7 @@ backSub_MOG2 = cv.createBackgroundSubtractorMOG2(detectShadows=False)
 backSub_GMG = cv.bgsegm.createBackgroundSubtractorGMG()
 
 #K-Nearest Neighbors
-#backSub_KNN = cv.createBackgroundSubtractorKNN()
+backSub_KNN = cv.createBackgroundSubtractorKNN()
 
 #Mezcla de Guasianas --> Apuntes: SubstraccionFondoII2023.pdf
 def bs_MOG(frame):
@@ -25,8 +25,13 @@ def bs_MOG2(frame):
     return fgMask
 
 def bs_GMG(frame):
-    # Aplicar la substracción de fondo al fotograma
+    # Aplicar la substracción de fondo al fotograma.
     fgMask = backSub_GMG.apply(frame)
+    return fgMask
+
+def bs_KNN(frame):
+    # Aplicar la substracción de fondo al fotograma
+    fgMask = backSub_KNN.apply(frame)
     return fgMask
 
 #https://docs.opencv.org/4.x/d7/d4d/tutorial_py_thresholding.html

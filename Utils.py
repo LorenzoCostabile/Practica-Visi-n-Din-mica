@@ -19,10 +19,19 @@ def draw_original_points(frame, title, frame_points, color=(0 , 0, 255)):
 
     return frame
 
-def draw_title(img, text, color=(255, 255, 255)):
+def draw_title(img, text = "Original", color=(255, 255, 255)):
     font = cv.FONT_HERSHEY_SIMPLEX
     org = (10, 30)
     font_scale = 1
     thickness = 2
     cv.putText(img, text, org, font, font_scale, color, thickness, cv.LINE_AA)
     return
+
+def draw_rectangles_title(img, particles, color_particles = (255, 0, 0), text = None, color=(255, 255, 255)):
+    for particle in particles:
+        x, y, w, h = particle.get_coordinates()
+        cv.rectangle(img, (x, y), (x + w, y + h), color_particles, 2)
+    
+    if text is not None:
+        draw_title(img, text, color)
+
