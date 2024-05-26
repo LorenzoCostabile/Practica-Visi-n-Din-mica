@@ -16,18 +16,34 @@ def filter_initialisation(img_shape):
     return Filter(particle_number, particle_size, img_shape[1], img_shape[0])
 
 
-def draw_rectangles_title(img, particles, color_particles = (255, 0, 0), text = None, color=(255, 255, 255), mode="selection"):
+def draw_selection_rectangles_title(img, particles, color_particles = (255, 0, 0), text = None, color=(255, 255, 255)):
     for particle in particles:
         x, y, w, h = particle.get_coordinates()
 
-        if particle.get_score() > 0 and mode == "selection":
+        if particle.get_score() > 0:
             cv.rectangle(img, (x, y), (x + w, y + h), color_particles, 2)
-        if particle.get_chosen() and mode == "chosen":
-            cv.rectangle(img, (x, y), (x + w, y + h), color_particles, 2)
+ 
 
     if text is not None:
         Utils.draw_title(img, text, color)
 
+def get_chosen_particle(particles):
+    chosen_particle = None
+    for particle in particles:
+        if particle.get_chosen():
+            chosen_particle = particle
+            break
+    return chosen_particle
+
+def draw_chosen_rectangle_title(img, particles, color_particles = (255, 0, 0), text = None, color=(255, 255, 255)):
+    chosen_particle = get_chosen_particle(particles)
+
+    if(chosen_particle):
+        x, y, w, h = chosen_particle.get_coordinates()
+        cv.rectangle(img, (x, y), (x + w, y + h), color_particles, 2)
+
+    if text is not None:
+        Utils.draw_title(img, text, color)
 
 def draw_images(filter, original_img, mask, i):
     global initial_img
@@ -38,8 +54,8 @@ def draw_images(filter, original_img, mask, i):
     chosen_img = mask_rgb.copy()
     prediction_img = mask_rgb.copy()
 
-    draw_rectangles_title(selection_img, filter.get_particles(), color_particles=(102, 102, 202), text="Selection")
-    draw_rectangles_title(chosen_img, filter.get_particles(), color_particles=(0, 0, 255), text="Estimation", mode="chosen")
+    draw_selection_rectangles_title(selection_img, filter.get_particles(), color_particles=(102, 102, 202), text="Selection")
+    draw_chosen_rectangle_title(chosen_img, filter.get_particles(), color_particles=(0, 0, 255), text="Estimation")
     Utils.draw_rectangles_title(prediction_img, filter.get_particles_prediction(), color_particles=(0, 255, 0), text="Prediction")
 
     if i == 0:
